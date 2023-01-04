@@ -15,6 +15,7 @@ client = discord.Client(intents=discord.Intents.default())
 #Constants
 limit = 1
 facts_api_url = 'https://api.api-ninjas.com/v1/facts?limit={}'.format(limit)
+jokes_api_url = 'https://api.chucknorris.io/jokes/random'
 
 
 #retrieve a fact using api call
@@ -27,6 +28,18 @@ def get_fact():
   else:
     print("Error:", response.status_code, response.text)
     return ('Can not retrieve a fact at this moment, please try again later.')
+
+
+#retrive a joke using api callable
+def get_joke():
+  response = requests.get(jokes_api_url)
+  if response.status_code == requests.codes.ok:
+    print(response.text)
+    json_data = json.loads(response.text)
+    return (json_data['value'])
+  else:
+    print("Error:", response.status_code, response.text)
+    return ('Can not retrieve a joke at this moment, please try again later.')
 
 
 #bot online event listener
@@ -48,6 +61,10 @@ async def on_message(message):
   if 'fact' in message.content:
     fact = get_fact()
     await message.channel.send(fact)
+
+  if message.content.startswith('joke'):
+    joke = get_joke()
+    await message.channel.send(joke)
 
 
 client.run(token)
