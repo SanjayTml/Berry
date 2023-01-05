@@ -10,7 +10,6 @@ cse_id = os.environ['google-cse-id']
 import discord
 import requests
 import json
-# from googleapiclient.discovery import build
 
 #Discord intent
 client = discord.Client(intents=discord.Intents.default())
@@ -48,8 +47,6 @@ def get_joke():
 
 #retrieve google search using custom google search
 def google_search(search_term, **kwargs):
-  # service = build("customsearch", "v1", developerKey=search_api_key)
-  # response = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
   response = requests.get(google_search_url + 'key=' + search_api_key +
                           '&cx=' + cse_id + '&q=' + search_term + '&start=0')
   if response.status_code == requests.codes.ok:
