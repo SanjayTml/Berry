@@ -11,6 +11,7 @@ import discord
 import requests
 import json
 from replit import db
+from keep_alive import keep_alive
 
 #Discord intent
 client = discord.Client(intents=discord.Intents.default())
@@ -187,4 +188,5 @@ async def on_message(message):
     await message.channel.send(HELP_MESSAGE)
 
 
+keep_alive()
 client.run(token)
