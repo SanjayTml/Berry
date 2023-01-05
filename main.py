@@ -16,8 +16,9 @@ from replit import db
 client = discord.Client(intents=discord.Intents.default())
 
 #Constants
-limit = 1
-facts_api_url = 'https://api.api-ninjas.com/v1/facts?limit={}'.format(limit)
+facts_limit = 1
+facts_api_url = 'https://api.api-ninjas.com/v1/facts?limit={}'.format(
+  facts_limit)
 jokes_api_url = 'https://api.chucknorris.io/jokes/random'
 google_search_url = 'https://www.googleapis.com/customsearch/v1?'
 
@@ -41,8 +42,12 @@ def delete_note(index, user_id):
   db_key = 'notes' + user_id
   notes = db[db_key]
   if len(notes) > index:
+    note = notes[index]
     del notes[index]
     db[db_key] = notes
+    return "Following note deleted:" + note
+  else:
+    return "Couldn't find the index note in your notes"
 
 
 #get user-specific notes
@@ -120,7 +125,11 @@ def append_list(list):
     message = message + list[i]
   return message
 
-  
+
+#help message
+HELP_MESSAGE = "```" + "Hi there, it\'s Berry!\n The following commands are available\n *.help* : Bring this helping message\n *.search* : Gives top google search results for the prompt followed by command\n *.fact* : Gives a random fact\n *.joke* : Gives a random Chuck Norris joke\n *.takenote* : Saves a private note in Berry\'s database\n *.notes* : Gives your private list of notes\n *.deletenote* : Deletes your note of index followed by the command\n **Thank you!**" + "```"
+
+
 #bot online event listener
 @client.event
 async def on_ready():
@@ -134,35 +143,48 @@ async def on_message(message):
     print('Returned!')
     return
 
-  if message.content.startswith('hello'):
+  if message.content.startswith('.hello'):
     print(message)
     await message.channel.send('Hello {0.author.name}!'.format(message))
 
-  if 'fact' in message.content:
+  if '.fact' in message.content:
     fact = get_fact()
     await message.channel.send(fact)
 
-  if message.content.startswith('joke'):
+  if message.content.startswith('.joke'):
     joke = get_joke()
     await message.channel.send(joke)
 
-  if message.content.startswith('search'):
-    search_term = parse_message(message.content, 'search')
+  if message.content.startswith('.search'):
+    search_term = parse_message(message.content, '.search')
     print(search_term)
     search_res = google_search(search_term)
     await message.channel.send(search_res)
 
-  if message.content.startswith('takenote'):
-    note = parse_message(message.content, 'takenote')
+  if message.content.startswith('.takenote'):
+    note = parse_message(message.content, '.takenote')
     print(note)
     user_id = str(message.author.id)
     status = take_note(note, user_id)
     await message.channel.send(status)
 
-  if message.content.startswith('notes'):
+  if message.content.startswith('.notes'):
     user_id = str(message.author.id)
     notes = get_notes(user_id)
     await message.channel.send(notes)
+
+  if message.content.startswith('.deletenote'):
+    user_id = str(message.author.id)
+    db_key = 'notes' + user_id
+    if db_key in db.keys():
+      index = int(message.content.split(".deletenote", 1)[1])
+      status = delete_note(index, user_id)
+      await message.channel.send(status)
+    else:
+      await message.channel.send("No notes found!")
+
+  if message.content.startswith('.help'):
+    await message.channel.send(HELP_MESSAGE)
 
 
 client.run(token)
